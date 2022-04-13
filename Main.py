@@ -1,8 +1,13 @@
 # IMPORTS
 import numpy as np
+import random 
+import keyboard
+import os
+import time
 
 width = 16 # Number of squares across the board is
 height = 16 # Number of squares the board is vertically
+global direction
 direction = 0 # Direction the snake is moving (0 = N, 90 = E, 180 = S, 270 = W)
 snakeLength = 5 # Defines the starting length of the snake, doesn't include head or tail
 
@@ -28,8 +33,8 @@ board[(int(round(height/2 + (snakeLength + 1), 0)), int(round(width/2, 0)))] = (
 
 def moveSnake(direction): # A function to move the snake on the screen
     global board
-    headPos = np.argwhere(board == 1) # Finds the snakes head
-    tailPos = np.argwhere(board == (np.amax(board))) # Finds the snakes tail
+    headPos = np.argwhere(board == 1)[0] # Finds the snakes head
+    tailPos = np.argwhere(board == (np.amax(board)))[0]
 
     for y in range(board.shape[0]): # Runs for every square on the board
         for x in range(board.shape[1]):
@@ -37,21 +42,47 @@ def moveSnake(direction): # A function to move the snake on the screen
                 board[x, y] += 1 # It increases its number by one
 
     if direction == 0: # If the snake is moving North
-        board[(headPos - 1), (headPos)] = 1 # Moves the snakes head forward one
+        board[(headPos[0] - 1), (headPos[1])] = 1 # Moves the snakes head forward one
     elif direction == 90: # If the snake is moving East
-        board[(headPos), (headPos + 1)] = 1 # Moves the snakes head forward one
-    elif direction == 190: # If the snake is moving South
-        board[(headPos - 1), (headPos)] = 1 # Moves the snakes head forward one
+        board[(headPos[0]), (headPos[1])] = 1 # Moves the snakes head forward one
+    elif direction == 180: # If the snake is moving South
+        board[(headPos[0]), (headPos[1])] = 1 # Moves the snakes head forward one
     elif direction == 270: # If the snake is moving West
-        board[(headPos), (headPos - 1)] = 1 # Moves the snakes head forward one
+        board[(headPos[0]), (headPos[1])] = 1 # Moves the snakes head forward one
 
-    board[tailPos] = 0 # Gets rid of the snakes tail
+    board[(tailPos[0]), tailPos[1]] = 0 # Gets rid of the snakes tail
 
-print(board)
+def genFruit(): # Generates a new fruit in a random position
+    global board
+    placingFruit = True
+    while placingFruit: # In a while loop so it keeps going until it is succesfully placed
+        attemptCoords = (random.randint(0, (height - 1)), random.randint(0, (width - 1))) # Generates a random location on the board, subtracted by one because arrays start counting from 0, not 1
+        if board[attemptCoords] == 0: # Checks if that pos is empty
+            board[attemptCoords] = -1 # Adds a fruit there
+            placingFruit = False 
 
-moveSnake(direction)
-
-print(board)
+def getInputs():
+    global direction
+    if keyboard.is_pressed("w"):
+        direction = 0
+        print("W pressed")
+    elif keyboard.is_pressed("a"):
+        direction = 270
+        print("A pressed")
+    elif keyboard.is_pressed("s"):
+        direction = 180
+        print("S pressed")
+    elif keyboard.is_pressed("d"):
+        print("D pressed")
+        direction = 90
+                   
+while True:
+    print(board)
+    moveSnake(direction)
+    getInputs()
+    time.sleep(1)
+    os.system("cls")
+    
 
 """
 Program Decomposition and requirements.
